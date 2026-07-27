@@ -1,0 +1,5 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Include external tasks file
+      ansible.builtin.include_tasks: /Users/hamza/Hamza/interview_CM/ansible/tasks/main.yaml

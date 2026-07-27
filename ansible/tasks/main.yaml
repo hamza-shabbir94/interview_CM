@@ -1,0 +1,32 @@
+---
+    - name: Ensure Homebrew is installed
+      ansible.builtin.shell: which brew
+      register: brew_check
+      failed_when: brew_check.rc != 0
+      changed_when: false
+
+    - name: Install k3d and kubectl via Homebrew
+      community.general.homebrew:
+        name:
+          - k3d
+          - kubectl
+        state: present
+
+    - name: Check if k3d cluster 'cardmarkt-cluster' already exists
+      ansible.builtin.command: k3d cluster list cardmarkt-cluster
+      register: cluster_check
+      failed_when: false
+      changed_when: false
+
+    - name: Create k3d cluster
+      ansible.builtin.command: k3d cluster create cardmarkt-cluster --port '8080:80@loadbalancer'
+      when: cluster_check.rc != 0
+
+    - name: Verify cluster nodes
+      ansible.builtin.command: kubectl get nodes
+      register: kube_nodes
+      changed_when: false
+
+    - name: Show cluster status
+      ansible.builtin.debug:
+        msg: "{{ kube_nodes.stdout_lines }}"
