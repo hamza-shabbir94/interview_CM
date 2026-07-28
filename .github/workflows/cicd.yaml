@@ -117,13 +117,13 @@ jobs:
 
       - name: Update image tag in k8s manifest
         run: |
-          sed -i "s|image: .*/cardmarkt_http-echo:.*|image: ${{ env.IMAGE_TAG }}|" k8s/http-echo.yaml
+          sed -i "s|image: .*/cardmarkt_http-echo:.*|image: ${{ env.IMAGE_TAG }}|" k8s/http-echo/http-echo.yaml
 
       - name: Commit and push manifest changes
         run: |
           git config --global user.email "hamza.shabbir.94.4@gmail.com"
           git config --global user.name "Hamza-Shabbir94"
-          git add k8s/http-echo.yaml CHANGELOG.md
+          git add k8s/http-echo/http-echo.yaml CHANGELOG.md
           git commit -m "[CI]: Update image tag to ${{ env.IMAGE_TAG }} [skip ci]" || echo "No changes to commit"
           git push origin HEAD:main
           git-cliff -o CHANGELOG.md
