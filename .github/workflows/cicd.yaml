@@ -2,7 +2,7 @@ name: Build, Scan, and Release
 
 on:
   push:
-# commenting out the branch trigger to avoid duplicate runs since we already have a branch trigger in the main workflow
+#  commenting out the branch trigger to avoid duplicate runs since we already have a branch trigger in the main workflow
 #    branches:
 #      - main
     tags:
