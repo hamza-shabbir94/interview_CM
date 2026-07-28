@@ -24,4 +24,4 @@ EXPOSE 5678
 
 # Run the application with a default message
 ENTRYPOINT ["http-echo"]
-CMD ["-text", "STATUS: 99.99% Uptime | COFFEE: 0% Remaining | GREETINGS: Hello CardMarkt!"]
+CMD ["-text", "STATUS: 99.99% Uptime | COFFEE: 0% Remaining | GREETINGS: Hello CardMarket!"]

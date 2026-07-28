@@ -1,12 +1,19 @@
-## [unreleased]
+## [1.2.1] - 2026-07-28
+
+### 🚀 Features
+
+- V1.2.1 adding feature and modified the file
 
 ### 🐛 Bug Fixes
 
 - Modify and fix the issue in shell/script.sh and k8s/nginx.yaml
+- Change the location deployment in cicd.yaml
+- Change the location deployment in cicd.yaml
 
 ### 💼 Other
 
 - Update image tag to hamza94/cardmarkt_http-echo:v1.2.0 [skip ci]
+- Update image tag to hamza94/cardmarkt_http-echo:v1.2.1 [skip ci]
 
 ### 📚 Documentation
 
