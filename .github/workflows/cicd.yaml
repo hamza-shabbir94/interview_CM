@@ -8,9 +8,52 @@ on:
       - 'v*' # Triggers on semantic release tags
 
 jobs:
-  build-scan-push:
+  # ==========================================
+  # STAGE 1: Build & Security Scan
+  # ==========================================
+  build-and-scan:
     runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+
+      - name: Build and load image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo:latest
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          # exit-code: '1' # Uncomment this if you want vulnerabilities to block the pipeline
+
+  # ==========================================
+  # STAGE 2: Push Multi-Platform to Docker Hub
+  # ==========================================
+  push:
+    needs: build-and-scan
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,7 +67,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      # Automatically generate professional tags (latest, v1.0.0, etc.)
       - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
@@ -34,28 +76,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
 
-      # 1. Build and load locally using the generated metadata tags
-      - name: Build and load image for scanning
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          load: true
-#          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      # 2. Security scan the local image
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo:latest
-          format: 'table'
- #         exit-code: '1'
-          severity: 'CRITICAL,HIGH'
-
-      # 3. Push to Docker Hub if the scan passes successfully
-      - name: Push image to Docker Hub
+      - name: Build and Push Multi-Platform image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -64,3 +85,42 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  # ==========================================
+  # STAGE 3: GitOps Manifest Update (CD Trigger)
+  # ==========================================
+  update-manifest:
+    needs: push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+
+      - name: Get primary image tag
+        id: image-tag
+        run: |
+          TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
+      - name: Update image tag in k8s manifest
+        run: |
+          sed -i "s|image: .*/cardmarkt_http-echo:.*|image: ${{ env.IMAGE_TAG }}|" k8s/http-echo.yaml
+
+      - name: Commit and push manifest changes
+        run: |
+          git config --global user.email "hamza.shabbir.94.4@gmail.com"
+          git config --global user.name "Hamza Shabbir"
+          git add k8s/http-echo.yaml
+          git commit -m "[CI]: Update image tag to ${{ env.IMAGE_TAG }} [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:main
