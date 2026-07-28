@@ -10,7 +10,7 @@ This repository contains my solution for the **DevOps Interview Challenge**. The
 * **Workload:** Custom containerized application based on `hashicorp/http-echo`, built from scratch using a dedicated `Dockerfile`.
 * **Kubernetes Deployment:** Declarative manifests incorporating custom liveness/readiness probes for reliable startup, explicit resource constraints, and a NodePort service.
 * **CI/CD Automation & GitOps:** Automated pipelines built with **GitHub Actions** and synchronized via **ArgoCD**. Pushing a Semantic Versioning tag (e.g., `v1.0.0`) triggers a build, a security vulnerability scan via **Trivy**, a push to Docker Hub, an automated manifest update back to the repository, and a GitOps sync via ArgoCD.
-* **Versioning & Changelogs:** Semantic Versioning (`SemVer`) combined with automated changelog generation using `git-cliff`.
+* **Versioning & Changelogs:** Semantic Versioning (`SemVer`) combined with automated changelog.
 * **Networking:** Kubernetes Services and `kubectl port-forward` for secure local application testing.
 
 ---
