@@ -30,7 +30,7 @@ jobs:
           images: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
+            type=semver,pattern={{version}},prefix=v
 
       - name: Build and load image for scanning
         uses: docker/build-push-action@v6
@@ -75,7 +75,7 @@ jobs:
           images: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
+            type=semver,pattern={{version}},prefix=v
 
       - name: Build and Push Multi-Platform image
         uses: docker/build-push-action@v6
@@ -106,7 +106,7 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo
           tags: |
-            type=semver,pattern={{version}}
+            type=semver,pattern={{version}},prefix=v
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Get primary image tag
