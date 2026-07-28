@@ -94,9 +94,10 @@ jobs:
     needs: push
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
+          ref: main # <--- CRITICAL FIX: Forces tracking of main instead of detached tag
           token: ${{ secrets.TOKEN }}
 
       - name: Extract metadata tags
@@ -105,14 +106,18 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Get primary image tag
         id: image-tag
         run: |
-          TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
-          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo:${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+            echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          fi
 
       - name: Update image tag in k8s manifest
         run: |
@@ -121,7 +126,7 @@ jobs:
       - name: Commit and push manifest changes
         run: |
           git config --global user.email "hamza.shabbir.94.4@gmail.com"
-          git config --global user.name "Hamza Shabbir"
+          git config --global user.name "Hamza-Shabbir94"
           git add k8s/http-echo.yaml
           git commit -m "[CI]: Update image tag to ${{ env.IMAGE_TAG }} [skip ci]" || echo "No changes to commit"
           git push origin HEAD:main
