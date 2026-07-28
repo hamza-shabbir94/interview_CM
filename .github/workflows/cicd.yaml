@@ -106,18 +106,14 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo
           tags: |
-            type=semver,pattern={{version}},prefix=v
             type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}},prefix=v
 
       - name: Get primary image tag
         id: image-tag
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            echo "IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/cardmarkt_http-echo:${{ github.ref_name }}" >> $GITHUB_ENV
-          else
-            TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
-            echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
-          fi
+          TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
 
       - name: Update image tag in k8s manifest
         run: |
