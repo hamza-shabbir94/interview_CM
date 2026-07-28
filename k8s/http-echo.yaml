@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: http-echo
-        image: hamza94/cardmarkt_http-echo # Update with your exact Docker Hub username/image if needed
+        image: hamza94/cardmarkt_http-echoLatest # Update with your exact Docker Hub username/image if needed
         imagePullPolicy: Always
         ports:
         - containerPort: 5678
