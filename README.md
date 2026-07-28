@@ -1,36 +1,32 @@
+# DevOps Interview Challenge - Solution
 
-# Interviews
+This repository contains my solution for the **DevOps Interview Challenge**. The setup covers containerization, local Kubernetes orchestration, automated releases with SemVer and Changelogs.
 
-## This repo contains tasks we request interviewees to complete
+---
 
-* This repository should be forked, candidates should work in their own forked versions.
-Please don't open pull requests with solutions agains this repository.
-* No tasks require the use of any paid services.
-* For all of the following tasks please use your favourite tools.
-* During the interview the interviewee guides us through
-their solution. Explaining decisions and technical concepts as we go.
-* Tasks can be solved in a very simplistic way or as complicated as you can imagine.
-Both can be valid.
+## 🚀 Architecture & Tech Stack
 
-### k8s deployment
+* **Orchestration:** Local Kubernetes cluster (`k3s`) provisioned using **Ansible** (Infrastructure as Code).
+* **Workload:** Custom containerized application based on `hashicorp/http-echo`, built from scratch using a dedicated `Dockerfile`.
+* **Kubernetes Deployment:** Declarative manifests incorporating custom liveness/readiness probes for reliable startup, explicit resource constraints, and a NodePort service.
+* **CI/CD Automation & GitOps:** Automated pipelines built with **GitHub Actions** and synchronized via **ArgoCD**. Pushing a Semantic Versioning tag (e.g., `v1.0.0`) triggers a build, a security vulnerability scan via **Trivy**, a push to Docker Hub, an automated manifest update back to the repository, and a GitOps sync via ArgoCD.
+* **Versioning & Changelogs:** Semantic Versioning (`SemVer`) combined with automated changelog generation using `git-cliff`.
+* **Networking:** Kubernetes Services and `kubectl port-forward` for secure local application testing.
 
-* please don't use cloud infra providers like AWS, GCP etc. The cluster should
-be a local one.
-  
-1. Set up a kubernetes cluster ie. kind, minikube, k3s etc.
-the one you like the most.
-2. Build and release an app. This application should have a dockerfile created
-by you and it should be built by you. This can be something very simple,
-ie traefik/whoami, hashicorp/http-echo, your own if you have one.
-Each release should happen automatically.
-3. Create a deployment of this app.
+---
 
-* extras: IaC, GitOps, semver, changelog
+## 📋 Code Reviews & Fixes Implemented
 
-### review
+### 1. Shell Script Refactoring (`shell/script.sh`)
 
-* please review [shellscript](shell/script.sh)
+* **Shebang Declaration:** Added `#!/bin/bash` at the top of the file to guarantee correct interpreter execution.
+* **Variable Quoting:** Replaced single quotes (`' '`) with double quotes (`" "`) around variable inputs to allow proper variable expansion and prevent word-splitting bugs.
+* **Typo Correction:** Fixed the variable name inconsistency from `$LOGFILE` to `"$LOG_FILE"` to ensure logs write out correctly.
 
-* please review [deployment](k8s/nginx.yaml)
+### 2. Kubernetes Deployment Refactoring (`k8s/nginx.yaml`)
 
-* extras: proper explanation
+* **RFC 1123 Compliance:** Renamed uppercase/camelCase identifiers (`myNginx`) to lowercase (`mynginx`) to satisfy Kubernetes naming rules for DNS subdomains.
+* **Resource Constraints:** Added CPU and memory `requests` and `limits` to prevent resource starvation on local nodes.
+* **Labels & Selectors:** Standardized and aligned `labels` and `matchLabels` selectors across deployments and pod templates for proper replica management.
+* **Port Alignment:** Configured standard container port `80` to match default image behaviors.
+* **Service Configuration:** Added an explicit `type: ClusterIP`, defined the `targetPort`, and renamed the service to `mynginx-svc` for clear resource identification.
