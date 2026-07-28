@@ -30,3 +30,5 @@
     - name: Show cluster status
       ansible.builtin.debug:
         msg: "{{ kube_nodes.stdout_lines }}"
+
+

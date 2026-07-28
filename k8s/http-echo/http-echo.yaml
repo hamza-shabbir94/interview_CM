@@ -20,8 +20,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 5678
-        
-        # Resource requests and limits
         resources:
           requests:
             memory: "64Mi"
@@ -37,7 +35,7 @@ spec:
             port: 5678
           initialDelaySeconds: 2
           periodSeconds: 5
-          failureThreshold: 30 # Gives the app up to 150 seconds (30 * 5s) to start up
+          failureThreshold: 30 
 
         # Liveness Probe (Restarts container if it becomes unhealthy)
         livenessProbe:

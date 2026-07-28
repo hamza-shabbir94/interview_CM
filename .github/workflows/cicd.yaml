@@ -83,7 +83,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -97,7 +97,7 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          ref: main # <--- CRITICAL FIX: Forces tracking of main instead of detached tag
+          ref: main
           token: ${{ secrets.TOKEN }}
 
       - name: Extract metadata tags
@@ -123,6 +123,7 @@ jobs:
         run: |
           git config --global user.email "hamza.shabbir.94.4@gmail.com"
           git config --global user.name "Hamza-Shabbir94"
-          git add k8s/http-echo.yaml
+          git add k8s/http-echo.yaml CHANGELOG.md
           git commit -m "[CI]: Update image tag to ${{ env.IMAGE_TAG }} [skip ci]" || echo "No changes to commit"
           git push origin HEAD:main
+          git-cliff -o CHANGELOG.md
