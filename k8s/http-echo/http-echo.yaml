@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: http-echo
-        image: hamza94/cardmarkt_http-echo:v1.2.1
+        image: hamza94/cardmarkt_http-echo:v1.2.2
         imagePullPolicy: Always
         ports:
         - containerPort: 5678
